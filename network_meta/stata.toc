@@ -2,4 +2,4 @@
 1
 2
 3
-p dea Data envelopment analysis
+p network_meta Perform network meta-analysis under consistency or inconsistency model Use network meta With STATA 19
