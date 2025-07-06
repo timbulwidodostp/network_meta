@@ -1,5 +1,23 @@
 D 'network_meta': Perform network meta-analysis under consistency or inconsistency model Use network meta With STATA 19
 D
+F clusterank.ado
+F clusterank.sthlp
+F ifplot.ado
+F ifplot.sthlp
+F intervalplot.ado
+F intervalplot.sthlp
+F mdsrank.ado
+F mdsrank.sthlp
+F misspattern.ado
+F misspattern.sthlp
+F mvmeta.ado
+F mvmeta.hlp
+F mvmeta_bscov_correlation.ado
+F mvmeta_bscov_equals.ado
+F mvmeta_bscov_proportional.ado
+F mvmeta_bscov_unstructured.ado
+F mvmeta_lmata.ado
+F mvmeta_make.ado
 F mvmeta_make.hlp
 F mvmeta_mufromsigma.ado
 F mvmetademo_run.sthlp
