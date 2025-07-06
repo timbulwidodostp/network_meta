@@ -1,0 +1,757 @@
+{smcl}
+{* *! version 3.1.3  22jul2015}{...}
+{vieweralsosee "mvmeta_make (if installed)" "mvmeta_make"}{...}
+{vieweralsosee "metan (if installed)" "metan"}{...}
+{vieweralsosee "metareg (if installed)" "metareg"}{...}
+{vieweralsosee "network (if installed)" "network"}{...}
+{viewerjumpto "Description" "mvmeta##description"}{...}
+{viewerjumpto "Syntax" "mvmeta##syntax"}{...}
+{viewerjumpto "Model options" "mvmeta##modeloptions"}{...}
+{viewerjumpto "Estimation options" "mvmeta##estimationoptions"}{...}
+{viewerjumpto "Output options: fixed parameters" "mvmeta##outputoptionsfixed"}{...}
+{viewerjumpto "Output options: weights and borrowing of strength" "mvmeta##wt"}{...}
+{viewerjumpto "Output options: probability-of-being-best" "mvmeta##pbest"}{...}
+{viewerjumpto "Output options: variance parameters" "mvmeta##outputoptionsvar"}{...}
+{viewerjumpto "Output options: miscellaneous" "mvmeta##outputoptionsmisc"}{...}
+{viewerjumpto "Covariance structures" "mvmeta##covstructures"}{...}
+{viewerjumpto "Studies in which some outcomes are unestimated" "mvmeta##missing"}{...}
+{viewerjumpto "Changes in mvmeta version 2.3" "mvmeta##changes2"}{...}
+{viewerjumpto "Changes from version 2.3 to version 3.1" "mvmeta##changes3"}{...}
+{viewerjumpto "Examples" "mvmeta##examples"}{...}
+{viewerjumpto "Details" "mvmeta##details"}{...}
+{viewerjumpto "Known problems" "mvmeta##problems"}{...}
+{viewerjumpto "References" "mvmeta##references"}{...}
+{viewerjumpto "Author and updates" "mvmeta##updates"}{...}
+{cmd:help mvmeta}{right: ({browse "http://www.stata-journal.com/article.html?article=up0049":SJ15-4: st0156_2})}
+{hline}
+
+{title:Title}
+
+{p2colset 5 15 17 2}{...}
+{p2col :{hi:mvmeta} {hline 2}}Multivariate random-effects meta-analysis and meta-regression{p_end}
+{p2colreset}{...}
+
+
+{title:Syntax}{marker syntax}
+
+{p 8 17 2}
+{cmd:mvmeta} {cmd:b V} [{it:xvars}]
+{ifin}
+[{cmd:,} 
+{* MODEL OPTIONS}
+{cmdab:v:ars(}{it:varlist}{cmd:)}
+{cmdab:wscor:r(}{it:expression}{cmd:)}
+{cmdab:bscov:ariance(}{it:covtype} [{it:matexp}]{cmd:)}
+{cmdab:eq:uations(}{it:yvar1}{cmd::}{it:xvar1}[{cmd:,} {it:yvar2}{cmd::}{it:xvar2}[{cmd:,} ...]]{cmd:)}
+{cmdab:nocons:tant}
+{cmdab:common:parm}
+{* ESTIMATION OPTIONS}
+{cmd:reml} {cmd:ml} {cmd:mm1} {cmd:mm2} {cmdab:f:ixed}
+{cmd:start(}{it:expression}{cmd:)}
+{cmdab:longp:arm}
+{cmd:noposdef}
+{cmd:psdcrit(#)}
+{it:{help maximize:maximize_options}}
+{cmdab:keep:mat(}{it:bname Vname}{cmd:)}
+{cmdab:supp:ress(}{cmd:fe}|{cmd:uv}|{cmd:mm}{cmd:)} 
+{* OUTPUT OPTIONS: FIXED}
+{cmdab:nounc:ertainv}
+{cmd:eform}[{cmd:(}{it:name}{cmd:)}]
+{cmd:dof(}{it:expression}{cmd:)}
+{cmd:randfix}[({it:varlist})]
+{* OUTPUT OPTIONS: WT}
+{cmd:wt}[({it:suboptions})]
+{* OUTPUT OPTIONS: PBEST}
+{cmd:pbest(min}|{cmd:max} {ifin}, {it:pbest_options}{cmd:)}
+{* OUTPUT OPTIONS: VAR}
+{cmd:print(}{it:string}{cmd:)}
+{cmd:i2}
+{opth i2fmt(%fmt)}
+{cmdab:nc:chi2}
+{cmd:ciscale(sd}|{cmd:logsd}|{cmd:logh)} 
+{cmdab:test:sigma}
+{* OUTPUT OPTIONS: MISC}
+{cmdab:bu:bble}
+{cmdab:shows:tart}
+{cmd:id(}{it:varname}{cmd:)}
+{cmdab:showa:ll}]
+
+{p 4 4 2}
+where the data are arranged with one line per study: the point estimates are
+held in variables {it:b}{cmd:*}, the variance of {it:bx} is held in variable
+{it:Vxx}, and the covariance of {it:bx} and {it:by} is held in variable
+{it:Vxy}.  If you have individual participant data, you can use
+{helpb mvmeta_make} to produce a dataset in the required format.
+
+
+{title:Description}{marker description}
+
+{p 4 4 2}
+Standard meta-analysis combines estimates of one parameter over several
+studies.  Multivariate meta-analysis is an extension that can combine
+estimates of several related parameters.  For example, we may have estimates
+of treatment effects on two different outcomes in a set of randomized trials,
+or we may have estimates of the difference in outcome between "high",
+"medium", and "low" levels of a covariate.  For further discussion of the
+multivariate meta-analysis model and its applications, see
+{help mvmeta##Jackson++11:Jackson, Riley, and White (2011)}.
+
+{p 4 4 2}
+{cmd:mvmeta} performs multivariate random-effects meta-analysis
+{help mvmeta##White09:(White 2009)} and multivariate random-effects
+meta-regression {help mvmeta##White11:(White 2011)} on a dataset of point
+estimates, variances, and (optionally) covariances.
+
+{p 4 4 2}Demonstrations are available on
+{help mvmetademo_setup:getting the data into mvmeta format} and 
+{help mvmetademo_run:running mvmeta}.
+
+{p 4 4 2}If you are doing network meta-analysis, please see my {help network}
+suite, which includes commands to formulate and run {cmd:mvmeta} models for
+network meta-analysis.
+
+
+{title:Options}{marker options}
+
+    {title:Estimation options}{marker estimationoptions}
+
+{phang}
+{cmd:vars(}{it:varlist}{cmd:)} specifies which variables should be used. By
+default, all variables named {it:b}{cmd:*} are used, but any variable named
+{it:b} is ignored.  {cmd:vars(b1 b2 b3)} and {cmd:vars(b3 b2 b1)} specify the
+same model but a different parameterization.
+
+{phang}
+{cmd:wscorr(}{it:expression}{cmd:)} specifies the value of all within-study
+correlations.  This means that covariance variables {it:Vxy} need not
+exist.  (For any that do exist, {cmd:wscorr()} is ignored.) Alternatively,
+{cmd:wscorr(riley)} can be used when within-study correlations are unknown.
+It uses the alternative model of
+{help mvmeta##Riley++08:Riley, Thompson, and Abrams (2008)} to estimate an
+overall correlation.
+{help mvmeta##Riley09:Riley (2009)} discusses other ways to handle unknown
+within-study correlations.
+
+{phang}
+{cmd:bscovariance(}{it:covtype} [{it:matexp}]{cmd:)}
+specifies the between-studies covariance structure;
+see {help mvmeta##covstructures:Covariance structures} below.
+
+{phang}
+{cmd:equations(}{it:yvar1}{cmd::}{it:xvar1} [{cmd:,}
+{it:yvar2}{cmd::}{it:xvar2}[{cmd:,} ...]]{cmd:)} 
+allows different outcomes to have different regression models. 
+For example, {cmd:equations(y1 y2:x1, y3:x2)} regresses
+{cmd:y1} and {cmd:y2} on {cmd:x1} and {cmd:y3} on {cmd:x2}.
+
+{phang}
+{cmd:noconstant} suppresses the constant in the regression models.
+
+{phang}
+{cmd:commonparm} forces the coefficients to be the same for all outcomes. 
+This option requires all equations to contain the same number of variables. 
+It can be useful in network meta-analysis and is illustrated in {help mvmeta##White12:White et al (2012)}.
+
+
+    {title:Estimation options}{marker estimationoptions}
+
+{phang}
+{cmd:reml}, the default, specifies that restricted maximum likelihood
+(REML) be used for estimation. Specify only one of the {cmd:reml}, {cmd:ml},
+{cmd:mm1}, {cmd:mm2}, or {cmd:fixed} options.
+
+{phang}
+{cmd:ml} specifies that maximum likelihood (ML) be used for
+estimation.  ML is likely to underestimate the variance, so REML is usually
+preferred. Specify only one of the {cmd:reml}, {cmd:ml}, {cmd:mm1}, {cmd:mm2},
+or {cmd:fixed} options.
+
+{phang}
+{cmd:mm1} specifies that the multivariate method-of-moments procedure
+({help mvmeta##Jackson++10:Jackson, White, and Thompson 2010}) be used for
+estimation.  This is a multivariate generalization of the procedure of
+{help mvmeta##DL1986:DerSimonian and Laird (1986)} and is faster than the
+likelihood-based methods.
+Specify only one of the {cmd:reml}, {cmd:ml}, {cmd:mm1}, {cmd:mm2}, or
+{cmd:fixed} options.
+
+{phang}
+{cmd:mm2} specifies that the multivariate method-of-moments procedure
+({help mvmeta##Jackson++13:Jackson, White, and Riley 2013}) be used for
+estimation.  This is a matrix-based extension of the method given by the
+{cmd:mm1} option and is preferred.  {cmd:mm} is a synonym for {cmd:mm2}.
+Specify only one of the {cmd:reml}, {cmd:ml}, {cmd:mm1}, {cmd:mm2}, or
+{cmd:fixed} options.
+
+{phang}
+{cmd:fixed} specifies that the fixed-effects model be used for estimation.
+Specify only one of the {cmd:reml}, {cmd:ml}, {cmd:mm1}, {cmd:mm2}, or
+{cmd:fixed} options.
+
+{phang}
+{cmd:start(}{it:matrix}|{it:matrix expression}|{cmd:mm}|{it:#}{cmd:)}
+specifies a starting value for the between-studies variance. The syntax
+depends on the covariance structure; see
+{help mvmeta##covstructures:Covariance structures} below.
+
+{phang}
+{cmd:longparm} parameterizes the model as one regression model for each
+outcome.  Without covariates, this is usually less convenient than the default
+(all outcomes forming a single regression model) but is required if the
+{cmd:pbest()} option is used.  With covariates, {cmd:longparm} is the
+default and cannot be changed.
+
+{phang}
+{cmd:noposdef} does not immediately halt execution if a within-study
+variance-covariance matrix is declared not to be positive semidefinite.
+
+{phang}
+{cmd:psdcrit(}{it:#}{cmd:)} changes the criterion for judging a
+variance-covariance matrix not to be positive semidefinite.  A
+variance-covariance matrix is regarded as positive semidefinite if the ratio
+of the smallest to the largest ratio is greater than the negative of #.  The
+default is {cmd:psdcrit(1E-8)}.
+
+{phang}
+{it:maximize_options} allows standard maximization options; see
+{manhelp maximize R}.
+
+{phang}
+{cmd:keepmat(}{it:bname Vname}{cmd:)} saves the study-specific estimates and
+variance matrices for study i as {it:bname}i and {it:Vname}i.
+
+{phang}
+{cmd:suppress(}{cmd:fe}|{cmd:uv}|{cmd:mm}{cmd:)} suppresses one or more of the
+following analyses that are run by default: a fixed-effects analysis (for the
+{cmd:randfix()} option), {cmd:suppress(fe)}; univariate analysis (for the
+{cmd:wt(rv)} option), {cmd:suppress(uv)}; and a method-of-moments analysis
+with unstructured covariance matrix (for the {cmd:i2} option),
+{cmd:suppress(mm)}.  This option is useful if these analyses fail. 
+
+
+    {title:Output options: Fixed parameters}{marker outputoptionsfixed}
+
+{phang}
+{cmd:nouncertainv} computes alternative (smaller) standard errors that ignore
+the uncertainty in the estimated variance-covariance matrix and therefore
+agree with results produced by procedures such as {cmd:SAS PROC MIXED}
+(without the {cmd:ddfm=kr} option) and {helpb metareg}.  (Confidence
+intervals, however, do not agree, because {cmd:mvmeta}, by default, uses a
+normal approximation, whereas the other procedures approximate the degrees of
+freedom of a t distribution.)
+
+{phang}
+{cmd:eform}[{cmd:(}{it:name}{cmd:)}] exponentiates the reported mean
+parameters and, if the optional argument is used, reports them as {it:name}.
+
+{phang}
+{cmd:dof(}{it:expression}{cmd:)} specifies the degrees of freedom for t tests
+and confidence intervals.  The expression may include {cmd:n}, the number of
+observations. The default is to use a normal distribution.
+
+{phang}
+{cmd:randfix}[({it:varlist})] describes the impact of heterogeneity on the
+estimated coefficients in the models for the specified variables (which must
+be outcome variables in the fitted model).  If {it:varlist} is not specified,
+then all outcome variables are used. 
+
+{pmore}
+The method is described by
+{help mvmeta##Jackson++12:Jackson, White, and Riley (2012)}.
+The estimated variance-covariance matrix is compared with that estimated under
+a fixed-effects model: the square roots of the determinants of these matrices
+are reported, followed by R, defined as the qth root of the ratio of these
+square roots, where q is the number of parameters involved.  R is a
+multivariate generalization of the R statistic of
+{help mvmeta##HigginsThompson02:Higgins and Thompson (2002)}, who note that R
+is often approximately equal to H, where I^2=(H^2-1)/H^2.
+
+
+    {title:Output options: Weights and borrowing of strength}{marker wt}
+
+{p 4 4 2}
+{cmd:wt}[({it:suboptions})] reports study weights and borrowing of
+strength.  A publication describing the methods is under review. The
+{it:suboptions} are the following:
+
+{phang2}
+{cmd:sd}, the default, reports study weights and borrowing of strength
+using the score decomposition method.  The method computes, for each
+parameter, the percentage of the total information for that parameter by study
+and source, where source is direct (from that outcome), borrowed (from other
+outcomes), and total.  By default, the total for each study across sources and
+the total for each source across studies are reported. 
+
+{phang2}
+{cmd:rv} reports borrowing of strength using the relative variances method.
+This compares the variance of each coefficient in the multivariate
+meta-analysis with its variance in a univariate meta-analysis.  Unlike the
+{cmd:sd} method, the {cmd:rv} method considers changes in the estimated
+between-studies heterogeneity matrix and hence may report negative values for
+borrowing of strength.
+
+{phang2}
+{cmd:dpc} reports data-point coefficients. These show how each estimated
+parameter is derived as a weighted sum of data points. 
+
+{phang2}
+{cmd:details} outputs a table of the full score decomposition ({cmd:sd} method
+only) or of the separate standard errors ({cmd:rv} method only).
+
+{phang2}
+{cmd:format}({it:fmt}) specifies the output format for all methods.
+
+{phang2}
+{cmd:clear} ({cmd:sd} method only) loads the data for the table into memory.
+
+{phang2}
+{cmd:keepmat(}{it:name}{cmd:)}  saves the matrices.  With the {cmd:sd} method,
+three matrices ({it:name}{cmd:borrowed}, {it:name}{cmd:direct}, and
+{it:name}{cmd:total}) are saved.  For the {cmd:rv} and {cmd:dpc} methods, one
+matrix, {it:name}, is saved.
+
+{phang2}
+{cmd:unscaled} ({cmd:sd} method only) modifies the {cmd:details} and
+{cmd:keepmat(}{it:name}{cmd:)} options to give unscaled, not scaled weights.
+
+{phang2}
+{cmd:wide} with the {cmd:sd} and {cmd:details} options causes the output to be
+in wide format.
+
+
+    {title:Output options: Probability of being best}{marker pbest}
+
+{phang}{cmd:pbest(min}|{cmd:max} {ifin}{cmd:,} [{it:suboptions}]{cmd:)}
+is useful in {help network:network meta-analysis}.  It requests estimation of
+the probability that each linear predictor is the best (that is, the maximum
+or minimum), depending on the first argument of {cmd:pbest()}.  Estimation is
+performed for each record in the current data that satisfies the {cmd:if} and
+{cmd:in} criteria. 
+
+{pmore}
+The probability is estimated under a Bayesian model with flat priors, assuming
+that the posterior distribution of the parameter estimates is approximated by
+a normal distribution with mean and variance equal to the frequentist
+estimates and variance-covariance matrix.  Rankings are constructed by drawing
+the coefficients multiple times  from their approximate posterior density.
+For each draw, the linear predictor is evaluated for each study, and the
+largest linear predictor is noted. 
+
+{pmore}
+For models without covariates, {cmd:pbest()} is available only if
+{cmd:longparm} was specified when the model was fit.
+
+{pmore}
+The {it:suboptions} of {cmd:pbest()} are the following:
+
+{phang3}
+{cmd:reps(}{it:#}{cmd:)} specifies the number of draws used. The default is
+{cmd:reps(1000)}.
+
+{phang3}
+{cmd:zero} specifies that zero is to be considered as another linear predictor. 
+
+{phang3}
+{cmd:gen(}{it:string}{cmd:)} specifies that the probabilities be saved in
+variables with prefix {it: string}. 
+
+{phang3}
+{cmd:seed(}{it:#}{cmd:)} specifies the random-number seed.
+
+{phang3}
+{opth format(%fmt)} specifies the output format.
+
+{phang3}{cmd:id(}{it:varname}{cmd:)} specifies an identifier for the output. 
+
+{phang3}
+{cmd:predict} ranks the true effects in a future study with the same
+covariates, thus allowing for heterogeneity as well as parameter uncertainty,
+as in the calculation of prediction intervals
+{help mvmeta##Higgins++09:(Higgins, Thompson, and Spiegelhalter 2009)}.
+The default behavior is to rank linear predictors and does not allow for
+heterogeneity.
+
+{phang3}
+{cmd:all} causes all ranks to be output, not just the best, as in
+{help mvmeta##Salanti++11:Salanti, Ades, and Ioannidis (2011)}.
+
+{phang3}
+{cmd:saving(}{it:filename}{cmd:,} {cmd:replace}{cmd:)} writes the draws from
+the posterior distribution (indexed by the identifier and the replication
+number) to {it:filename}, and {cmd:replace} allows this file to be
+overwritten.
+
+{phang3}
+{cmd:clear} causes the summarized probabilities to be loaded into memory, so
+that users can produce their own tabulations or graphs. This disables the
+{cmd:gen()} option.
+
+{phang3}
+{cmd:bar} draws a bar graph of the probabilities.
+
+{phang3}
+{cmd:line} draws a line graph of the probabilities.
+
+{phang3}
+{cmd:cumulative} changes the bar or line graph to show cumulative
+probabilities.  The rankogram of
+{help mvmeta##Salanti++11:Salanti, Ades, and Ioannidis (2011)}
+is produced by specifying this together with the {cmd:line} suboption.
+
+{phang3}
+{cmd:mcse} adds the Monte Carlo standard errors to the tables.
+
+{phang3}
+{cmd:meanrank} adds the mean rank and the SUCRA of
+{help mvmeta##Salanti++11:Salanti, Ades, and Ioannidis (2011)}
+to the table.  The SUCRA is the rescaled mean rank: it is 1 when a treatment
+is certain to be the best and 0 when a treatment is certain to be the worst.
+
+{phang3}
+{cmd:tabdispoptions(}{it:string}{cmd:)} specifies options valid for
+{helpb tabdisp}, which draws the results table.  For example,
+{cmd:tabdispoptions(cellwidth(10))}.
+
+
+    {title:Output options: Variance parameters}{marker outputoptionsvar}
+
+{phang}
+{cmd:print(}{it:string}{cmd:)} determines how the between-studies
+variance-covariance matrix is reported.  {cmd:print(bscorr)}, the default,
+reports the between-studies standard deviations and correlation matrix.
+{cmd:print(bscov)} reports the between-studies variance-covariance matrix.
+{cmd:print(bscov bscorr)} reports both.
+
+{phang}{cmd:i2} reports the between-study variance and the I-squared statistic
+for each outcome, together with confidence intervals.  I-squared is computed as
+between/(within + between), where "between" is the appropriate element of
+Sigma and "within" is given by
+{help mvmeta##HigginsThompson02:Higgins and Thompson (2002, eq. 9)}.
+The method is described in {help mvmeta##White11:White (2011, sec. 3.6)}.
+
+{pmore}
+Confidence intervals are computed as follows.  With {cmd:fixed} or {cmd:mm1}
+estimation, the method of 
+{help mvmeta##HigginsThompson02:Higgins and Thompson (2002)} is used,
+implemented by {helpb heterogi}.  With {cmd:reml} or {cmd:ml} estimation,
+confidence intervals are computed by {helpb nlcom} on a scale specified by the
+{cmd:ciscale()} option.  With {cmd:mm2} estimation, I have implemented a new
+and even more ad hoc method: the estimated between-study variance is used to
+reconstruct the diagonal elements of the Q matrix, and the method of 
+{help mvmeta##HigginsThompson02:Higgins and Thompson (2002)} is used
+as if this were the observed Q matrix.
+
+{phang}{opth i2fmt(%fmt)} specifies the output format for the I-squared
+statistics.
+
+{phang}{cmd:ncchi2} uses this option of {helpb heterogi} in computing
+confidence intervals. It is relevant only after {cmd:mm} estimation.
+
+{phang}{cmd:ciscale(sd}|{cmd:logsd}|{cmd:logh)} determines the scale on which
+confidence intervals for the between-study variance and I-squared are computed
+after REML or ML estimation: tau, log(tau) or log(H), where tau^2 is the
+"between" variance above and H^2 = (1 + between / within).  The default is
+{cmd:ciscale(sd)}. 
+
+{phang}{cmd:testsigma} performs a likelihood-ratio test of Sigma=0, if REML or
+ML estimation was used. 
+
+
+    {title:Output options: Miscellaneous}{marker outputoptionsmisc}
+
+{phang}
+{cmd:bubble} specifies that a bubble plot of the data be drawn.
+
+{phang}
+{cmd:showstart} reports the starting values used.
+
+{phang}{cmd:id(}{it:varname}{cmd:)} specifies an identifier for the output.
+This affects {cmd:wt()} and {cmd:pbest()}.
+
+{phang}
+{cmd:showall} reports the estimated values of the basic parameters underlying
+the between-studies variance matrix.
+
+
+{title:Covariance structures}{marker covstructures}
+
+{pstd}The between-studies variance-covariance matrix Sigma may be modeled in
+various ways.  Each option has a different way to specify the starting values
+for Sigma.  In each case, the starting value for the fixed parameters is
+derived from the starting value of Sigma.
+
+{phang}
+{cmd:bscovariance(}{cmdab:uns:tructured)}, the default, estimates an
+unstructured Sigma.  Starting values for Sigma may be
+specified explicitly by {cmd:start(}{it:matrix_expression}{cmd:)}.
+{cmd:start(mm)} (the default) specifies that the starting value is
+computed by the {cmd:mm} method.  {cmd:start(0)} uses a starting value of 0.001
+times the default. 
+
+{phang}
+{cmd:bscovariance(}{cmdab:prop:ortional} {it:matexp}{cmd:)} models
+Sigma = tau^2*{it:matexp}, where tau is an unknown parameter and {it:matexp} is
+a known matrix expression (for example, a matrix name or I(2)).  {cmd:start()}
+specifies the starting value for the scalar tau.
+
+{phang}
+{cmd:bscovariance(}{cmdab:exch:angeable} #{cmd:)} is a shorthand for
+{cmd:bscovariance(proportional P)}, where {cmd:P} is a matrix with 1s on the
+diagonal and # off the diagonal.  {cmd:bscovariance(exchangeable 0.5)} is
+widely used in network meta-analysis.
+
+{phang}
+{cmd:bscovariance(}{cmdab:eq:uals} {it:matexp}{cmd:)} forces Sigma =
+{it:matexp}, where {it:matexp} is a known matrix expression (for example, a
+matrix name or I(2)).  {cmd:start()} is not required.
+
+{phang}
+{cmd:bscovariance(}{cmdab:corr:elation} {it:matexp}{cmd:)} models
+Sigma = D*{it:matexp}*D, where {it:matexp} is a known matrix expression
+containing the between-study correlations and D is an unknown diagonal matrix
+containing the between-studies standard deviations.
+{cmd:start({it:rowvector})} specifies the starting values for the diagonal of
+D.
+
+
+{title:Studies in which some outcomes are unestimated}{marker missing}
+
+{pstd}
+{cmd:mvmeta} now deals naturally with cases where a study reports only a
+subset of outcomes; that is, all computation methods are adapted to handle
+this case.  {cmd:mvmeta} ignores variances and covariances specified for
+missing point estimates.  Conversely, it expects nonmissing variances and
+covariances to accompany nonmissing point estimates.
+
+{pstd}
+The previous version of {cmd:mvmeta} used an augmentation procedure in which
+missing quantities were replaced by an arbitrary value with a large estimated
+variance; this is now unnecessary but can be implemented using the
+{cmd:augment} option.
+
+{pstd}
+{helpb mvmeta_make} automatically fills in missing values using the
+augmentation algorithm described in {help mvmeta##W2009:White (2009)}.
+
+
+{title:Changes in mvmeta version 2.3}{marker changes2}
+
+{pstd}
+{cmd:mvmeta} version 2.3 was published in the Stata Journal
+{help mvmeta##White11:(White 2011)} with the following changes:
+
+{pstd}
+Meta-regression is allowed.  The simple syntax is {cmd:mvmeta b V xvars}.
+The more flexible syntax uses the {cmd:eq()} option.  For example, for
+two-dimensional b, {cmd:mvmeta b V x} is the same as {cmd:mvmeta b V,}
+{cmd:eq(b1:x,b2:x)}.
+
+{pstd}
+{cmd:mvmeta}, typed without specifying {cmd:b} and {cmd:V}, redisplays the
+latest estimation results.  All the output options listed above may be used,
+except {cmd:keepmat()}.
+
+{pstd}
+{cmd:eform} is correctly implemented and is ignored if long parameterization
+is used without covariates.
+
+{pstd}
+The starting values (for {cmd:bscov(uns)}) are produced by default by the
+method of moments.
+
+{pstd}
+The {cmd:showchol} option has been renamed {cmd:showall}.
+
+{pstd}
+The likelihood is coded using Mata and appears on initial tests to be 2-5
+times faster.
+
+{pstd}
+{cmd:corr()} has been renamed {cmd:wscorr()}.
+
+{pstd}
+{cmd:bscorr} and {cmd:bscov} have been renamed {cmd:print(bscorr)} and
+{cmd:print(bscov)}, respectively.
+
+
+{title:Changes from version 2.3 to version 3.1}{marker changes3}
+
+{pstd}
+The command has been modified to work with the new {helpb network} suite for
+network meta-analysis.  Particular changes include the new {cmd:commonparm}
+option and the shorthand {cmd:bscov(exchangeable} {it:#}{cmd:)}.
+
+{pstd}The {cmd:equations()} option now allows lists of y-variables.
+
+{pstd}The matrix-based method of moments has been added as the {cmd:mm2} option 
+and is the default if {cmd:mm} is specified.
+
+{pstd}
+The following new suboptions for {cmd:pbest()} allow various graphical
+displays, saving of results, and numerical summaries of the estimated ranks: 
+{cmd:all}
+{cmd:saving(}{it:filename}{cmd:)} 
+{cmd:clear} 
+{cmd:bar} 
+{cmd:line} 
+{cmdab:cum:ulative}
+{cmd:mcse} 
+{cmdab:mean:rank} 
+{cmdab:tabdisp:options(}{it:string}{cmd:)}.
+
+{pstd}
+The new {cmd:wt} option displays study weights and borrowing of strength.
+
+{pstd}
+The new {cmd:randfix} option compares random-effects with fixed-effects
+results. 
+
+{pstd}
+The program structure has been changed: by default, the fixed-effects model,
+all univariate models, and the unstructured method of moments are fit before
+the specified model.  The {cmd:suppress()} option can be used to suppress some
+or all of these analyses; in particular, it is used by {cmd:network}.
+
+{pstd}
+The augmentation procedures used by version 1 of {cmd:mvmeta} are unnecessary
+and are now undocumented.  The options {cmd:augment}, {cmd:augquiet},
+{cmd:missest(#)}, and {cmd:missvar(#)} remain available.
+
+{pstd}
+A bug in the estimation procedure for the {cmd:wscorr(riley)} method, which led
+to wrong answers, has been fixed.  Several minor bugs have also been fixed. 
+
+
+{title:Examples}{marker examples}
+
+{pstd}First stage, starting with individual participant data ({cmd:fg} has
+levels 1-5):
+
+{phang2}{cmd:. xi: mvmeta_make stcox ages i.fg, strata(sex tr) nohr saving(FSCstage1) replace by(cohort) usevars(i.fg) names(b V) esave(N)}
+
+{pstd}
+Second stage:
+
+{phang2}{cmd:. use FSCstage1, clear}
+
+{phang2}{cmd:. mvmeta b V}
+
+{pstd}
+For more examples, see {help mvmetademo_run}.
+
+
+{title:Details}{marker details}
+
+{pstd}
+The REML and ML methods use Newton-Raphson maximization of the likelihood or
+restricted likelihood by using {helpb ml}. The between-studies variance matrix
+(using {cmd:bscov(uns)}) is parameterized with its Cholesky decomposition in
+order to ensure that it is nonnegative definite.
+
+{pstd}
+Parts of {cmd:mvmeta} require the additional program {helpb sencode}.
+
+
+{title:Known problems}{marker problems}
+
+{pstd}
+With methods of moments, none of {cmd:wscorr(riley)}, {cmd:bscov(prop)}, or
+{cmd:bscov(corr)} has been implemented; in fact, I do not yet have methods.
+
+{pstd}
+Please report any other problems to
+{browse "mailto:ian.white@mrc-bsu.cam.ac.uk":ian.white@mrc-bsu.cam.ac.uk}.
+
+
+{title:References}{marker references}
+
+{phang}{marker DL1986}{...}
+DerSimonian, R., and N. Laird.  1986.  Meta-analysis in clinical trials.
+{it:Controlled Clinical Trials} 7: 177-188.
+
+{phang}{marker HigginsThompson02}
+Higgins, J. P. T., and S. G. Thompson.  2002.  Quantifying heterogeneity
+in a meta-analysis. {it:Statistics in Medicine} 21: 1539-1558.
+
+{phang}{marker Higgins++09}
+Higgins, J. P. T., S. G. Thompson, and D. J. Spiegelhalter.  2009.
+A re-evaluation of random-effects meta-analysis.
+{it:Journal of the Royal Statistical Society, Series A} 172: 137-159.
+
+{phang}{marker Jackson++10}
+Jackson, D., I. R. White, and S. G. Thompson. 2010.  Extending
+DerSimonian and Laird's methodology to perform multivariate random effects
+meta-analyses.  {it:Statistics in Medicine} 29: 1282-1297.
+
+{phang}{marker Jackson++11}
+Jackson, D., R. Riley, and I. R. White. 2011.
+Multivariate meta-analysis: Potential and promise. 
+{it:Statistics in Medicine} 30: 2481-2498.
+
+{phang}{marker Jackson++12}
+Jackson, D., I. R. White, and R. D. Riley. 2012.
+Quantifying the impact of between-study heterogeneity in multivariate
+meta-analyses.
+{it:Statistics in Medicine} 31: 3805-3820.
+
+{phang}{marker Jackson++13}
+Jackson, D., I. R. White, and R. D. Riley. 2013.
+A matrix-based method of moments for fitting the multivariate random effects
+model for meta-analysis and meta-regression.  {it:Biometrical Journal} 55:
+231-245.
+
+{phang}{marker Riley09}
+Riley, R. D. 2009.
+Multivariate meta-analysis: the effect of ignoring within-study correlation.
+{it:Journal of the Royal Statistical Society} 172: 789-811.
+
+{phang}{marker Riley++08}
+Riley, R. D., J. R. Thompson, and K. R. Abrams. 2008.
+An alternative model for bivariate random-effects meta-analysis when the
+within-study correlations are unknown. {it:Biostatistics} 9: 172-186.
+
+{phang}{marker Salanti++11}
+Salanti, G., A. E. Ades, and J. P. A. Ioannidis. 2011.
+Graphical methods and numerical summaries for presenting results from
+multiple-treatment meta-analysis: An overview and tutorial.
+{it:Journal of Clinical Epidemiology} 64: 163-171.
+
+{phang}{marker White09}
+* White, I. R.  2009.
+{browse "http://www.stata-journal.com/article.html?article=st0156":Multivariate random-effects meta-analysis}.
+{it:Stata Journal} 9: 40-56.
+
+{phang}{marker White11}
+* White, I. R.  2011.
+{browse "http://www.stata-journal.com/article.html?article=st0156_1":Multivariate random-effects meta-regression: Updates to mvmeta}.
+{it:Stata Journal} 11: 255-270.
+
+{phang}{marker White12}
+White, I. R., J. K. Barrett, D. Jackson, and J. P. T. Higgins. 2012.
+Consistency and inconsistency in network meta-analysis: 
+    Model estimation using multivariate meta-regression.
+{it:Research Synthesis Methods} 3: 111-125.
+
+* Please use these references to cite this program.
+
+
+{title:Author and updates}{marker updates}
+
+{pstd}Ian White, MRC Biostatistics Unit, Cambridge, UK.{break}
+Email {browse "mailto:ian.white@mrc-bsu.cam.ac.uk":ian.white@mrc-bsu.cam.ac.uk}.
+
+{pstd}You can get the latest version of this and my other Stata software using 
+{stata "net from http://www.mrc-bsu.cam.ac.uk/IW_Stata/"}.
+
+
+
+{title:Also see}
+
+{p 4 14 2}
+Article:  {it:Stata Journal}, volume 15, number 4: {browse "http://www.stata-journal.com/article.html?article=up0049":st0156_2},{break}
+          {it:Stata Journal}, volume 11, number 2: {browse "http://www.stata-journal.com/article.html?article=st0156_1":st0156_1},{break}
+         {it:Stata Journal}, volume 8, number 4: {browse "http://www.stata-journal.com/article.html?article=st0156":st0156}
+
+{p 7 14 2}Help: {helpb mvmeta_make}, {helpb metan}, 
+{helpb metareg} (if installed)
+{p_end}

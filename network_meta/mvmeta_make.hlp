@@ -1,0 +1,183 @@
+{smcl}
+{* 8aug2008}{...}
+{cmd:help mvmeta_make}{right: ({browse "http://www.stata-journal.com/article.html?article=up0049":SJ15-4: st0156_2})}
+{hline}
+
+{title:Title}
+
+{p2colset 5 20 20 2}{...}
+{p2col :{hi:mvmeta_make} {hline 2}}Prepare data for multivariate meta-analysis{p_end}
+{p2colreset}{...}
+
+
+{title:Syntax}
+
+{p 8 19 2}
+{cmd:mvmeta_make}
+{it:regression_command}
+{ifin}
+{weight}{cmd:,}
+{cmd:by(}{it:by_variable}{cmd:)}
+{cmdab:sav:ing(}{it:savefile}{cmd:)}
+[{cmd:replace}
+{cmd:append}
+{cmdab:name:s(}{it:bname Vname}{cmd:)}
+{cmd:keepmat}
+{cmdab:usev:ars(}{it:varlist}{cmd:)}
+{cmdab:usec:onstant}
+{cmd:esave(}{it:namelist}{cmd:)}
+{cmdab:nodet:ails}
+{cmd:pause}
+{cmdab:ppf:ix(none}|{cmd:check}|{cmd:all)}
+{cmdab:aug:wt(}{it:#}{cmd:)}
+{cmdab:noaugl:ist}
+{cmdab:ppc:md(}{it:regcmd} [{cmd:,} {it:options}]{cmd:)}
+{cmd:hard}
+{it:regression_options}]
+
+{pstd}{cmd:mvmeta_make} performs {it:regression_command} for each level of
+{it:by_variable} and stores the results in {it:savefile} in the format
+required by {helpb mvmeta}. {it:weight} is any weight allowed by
+{it:regression_command}.
+
+
+{title:Description}
+
+{pstd} {cmd:mvmeta_make} is a utility command to produce data in the correct
+format for {helpb mvmeta}.
+
+
+{title:Options}
+
+{phang} {cmd:by(}{it:by_variable}{cmd:)} is required; it identifies the
+studies in which the regression command will be performed.
+
+{phang} {cmd:saving(}{it:savefile}{cmd:)} is required; is specifies to save
+the regression results to {it:savefile}.
+
+{phang} {cmd:replace} specifies to overwrite the existing file called
+{it:savefile}.
+
+{phang} {cmd:append} specifies to append the current results to the existing
+file called {it:savefile}.
+
+{phang} {cmd:names(}{it:bname Vname}{cmd:)} specifies that the estimated
+coefficients for variable {it:x} are to be stored in variable {it:bname_x} and
+that the estimated covariance between coefficients {it:bname_x} and
+{it:bname_y} is to be stored in variable {it:Vname_xy}. The default is
+{cmd:names(y S)}.
+
+{phang} {cmd:keepmat} specifies that the results are also to be stored as
+matrices. The estimate vector and the covariance matrix for study {it:i} are stored as
+matrices {it:bname_i} and {it:Vname_i}, respectively, where {it:bname} and
+{it:Vname} are the names specified with {cmd:names()}.
+
+{phang} {cmd:usevars(}{it:varlist}{cmd:)} identifies the variables whose
+regression coefficients are of interest. The default is all variables in the
+model, excluding the constant.
+
+{phang} {cmd:useconstant} specifies that the constant is also of interest.
+
+{phang} {cmd:esave(}{it:namelist}{cmd:)} adds the specified {cmd:e()}
+statistics to the saved data.  For example, {cmd:esave(N ll)} saves {cmd:e(N)}
+and {cmd:e(ll)} as variables {cmd:_e_N} and {cmd:_e_ll}.
+
+{phang} {cmd:nodetails} suppresses the results of running
+{it:regression_command} on each study.
+
+{phang} {cmd:pause} pauses output after the analysis of each study, provided
+that {cmd:pause on} has been set.
+
+{phang} {cmd:ppfix(none}|{cmd:check}|{cmd:all)} specifies whether perfect prediction
+should be fixed in no studies, only in studies where it is detected (the
+default), or in all studies.
+
+{phang} {cmd:augwt(}{it:#}{cmd:)} specifies the total weight of augmented
+observations to be added in any study in which perfect prediction is detected
+(see the following section). {cmd:augwt(0)} turns off augmentation but is not
+recommended.  The default is {cmd:augwt(0.01)}.  
+
+{phang} {cmd:noauglist} suppresses listing of the augmented observations.
+
+{phang} {cmd:ppcmd(}{it:regcmd} [{cmd:,} {it:options}]{cmd:)} specifies that
+perfect prediction should be fixed by using regression command {it:regcmd}
+with options {it:options} instead of by using the default augmentation procedure.
+
+{phang} {cmd:hard} is useful when convergence cannot be achieved in some
+studies.  It captures the results of initial model fitting in each study and
+treats any nonzero return code as a symptom of perfect prediction.
+
+{phang}{it:regression_options} are any options allowed for
+{it:regression_command}.
+
+
+{title:Perfect prediction}
+
+{pstd} Perfect prediction is a problem that may lead to highly misleading
+results being output.  It can occur in regression models for categorical or
+survival data.  In logistic regression, for example, perfect prediction occurs
+if there is a level of a categorical explanatory variable for which the
+observed values of the outcome are all zero; in Cox regression, it occurs if
+there is a category in which no events are observed.
+
+{pstd} {cmd:mvmeta_make} checks for perfect prediction by checking that 1) all
+parameters are reported and 2) there are no zeroes on the diagonal of the
+variance-covariance matrix of the parameter estimates.  If perfect prediction
+is detected, {cmd:mvmeta_make} augments the data to avoid perfect prediction.
+
+{pstd} The augmentation is performed at two design points for each covariate
+{it:x}, defined by letting {it:x} equal its study-specific mean plus or minus
+its study-specific standard deviation and by fixing other covariates at their
+mean value.  The records added at each design point depend on the form of
+regression model.  For regression models with discrete outcomes, we add one
+observation with each outcome level.  For survival analyses, we add one event
+at time tmin/2 and one censoring at time tmax+tmin/2, where tmin and tmax are
+the earliest and latest follow-up times in the study. For a stratified model,
+the augmentation is performed for each stratum.
+
+{pstd} A total weight of wp is then shared equally between the added
+observations, where w is specified by the {cmd:augwt(}{it:#}{cmd:)} option, and
+p is the number of model parameters (treating the baseline hazard in a Cox
+model as a single parameter).
+
+{pstd} The regression model is then rerun including the weighted added
+observations.
+
+{pstd} When many studies have perfect prediction, it may be worth specifying
+the {cmd:ppfix(all)} option, which bypasses the initial fit of the model
+without augmentation.
+
+{pstd} Alternatives to augmentation include penalized likelihood methods,
+which would be specified by the {cmd:ppcmd()} option.  These methods are
+implemented by {helpb plogit} and {helpb stpcox}, which should in the near
+future be able to handle perfect prediction.
+
+{pstd} The output dataset contains variables _ppfix (which indicates whether
+the output results derived from a model in which perfect prediction was
+tackled) and _ppremains (which indicates whether perfect prediction was
+detected in this final model).
+
+
+{title:Example}
+
+{pstd}First stage, starting with individual participant data ({cmd:fg} has
+levels 1-5):
+
+{phang}{cmd:. xi: mvmeta_make stcox ages i.fg, strata(sex tr) nohr saving(FSCstage1) replace by(cohort) usevars(i.fg) names(b V) esave(N)}
+
+{pstd}Second stage:
+
+{phang}{cmd:. use FSCstage1, clear}
+
+{phang}{cmd:. mvmeta b V}
+
+
+{title:Also see}
+
+{p 4 14 2}
+Article:  {it:Stata Journal}, volume 15, number 4: {browse "http://www.stata-journal.com/article.html?article=up0049":st0156_2},{break}
+          {it:Stata Journal}, volume 11, number 2: {browse "http://www.stata-journal.com/article.html?article=st0156_1":st0156_1},{break}
+         {it:Stata Journal}, volume 8, number 4: {browse "http://www.stata-journal.com/article.html?article=st0156":st0156}
+
+{p 7 14 2}Help:  {helpb mvmeta}, {helpb metan}, {helpb metareg} (if installed)
+{p_end}
