@@ -1,6 +1,8 @@
 # network_meta
 Perform network meta-analysis under consistency or inconsistency model Use network meta With STATA 19
 
+https://www.youtube.com/watch?v=j1D5UiORtaM
+
 Olah Data Semarang
 
 WA : +6285227746673 (085227746673)
